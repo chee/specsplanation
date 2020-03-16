@@ -171,7 +171,7 @@ The following is the list of ignored files in most component Bower configuration
 	"build"
 ]</code></pre>
 #+END_SRC
-- can generate these, recommend them
+- can generate these, recommend them with clippy
 
 #+BEGIN_SRC markdown
 ### npm
@@ -179,27 +179,43 @@ The following is the list of ignored files in most component Bower configuration
 Origami components **may** include a `package.json` manifest. As well as following the <a href="https://docs.npmjs.com/files/package.json" class="o-typography-link--external">`package.json` spec</a>, there are additional requirements to make the component's npm manifest conform to the Origami specification:
 #+END_SRC
 
+- validate the package.json passes the npmjs "spec"
+
 #+BEGIN_SRC markdown
   - It **must not** include any of the following properties: `bin`, `bugs`, `config`, `cpu`, `dependencies` (as this would indicate that the manifest is required for consumption of the component), `engines`, `engineStrict`, `files`, `main`, `os`, `preferGlobal`, `publishConfig`
 #+END_SRC
+- ensure the package.json contains none of these fields
 #+BEGIN_SRC markdown
   - It **must not** include a `version` property
 #+END_SRC
+- or this field
 #+BEGIN_SRC markdown
   - It **must** include a `devDependencies` property set to an object **_if_** the component has any npm dependencies required for development or testing
 #+END_SRC
+- um
 #+BEGIN_SRC markdown
   - It **should** include a `private` property set to `true`
 #+END_SRC
+- warn if this isn't the case
 #+BEGIN_SRC markdown
   - It **may** include any other standard npm-defined property
 #+END_SRC
+- OK
+
+#+BEGIN_SRC markdown
 ### Specifying dependencies
 
 Components **should** have as few dependencies as possible. When a dependency is not required for use in production, it **should** be listed as a development dependency in whichever package manager you use.
+#+END_SRC
+- If there is an unused dependency, error about that
 
+#+BEGIN_SRC markdown
 Dependencies used in a component **must** be added explicitly to the package manager config. Components **must not** rely on code from sub-dependencies (see example).
+#+END_SRC
+- ensure every package required in ~main.{js,scss}~ and ~src/*~ is explicitly included in the dependencies
+- ensure anything in ~test/*~ is mentioned in either ~dependencies~ or ~devDependencies~
 
+#+BEGIN_SRC markdown
 <aside>
   Sub-dependency example: if <code>o-component-a</code> includes <code>o-component-b</code> as a dependency and a new component you're developing requires features from both, then both must be added as explicit dependencies – you must not depend on <code>o-component-a</code> alone.
 </aside>
@@ -207,7 +223,13 @@ Dependencies used in a component **must** be added explicitly to the package man
 When listing dependencies in your `bower.json` manifest, the <a href="https://semver.org/" class="o-typography-link--external">SemVer</a> range that you specify:
 
   - **must** be specified in a way that allows `MINOR` and `PATCH` to automatically update. This is normally achieved by using the caret (`^`) operator
+#+END_SRC
+- check all dependencies are using the :carrot: (or ~>= <=~, though warn on ~>= <==~ with clippy).
+#+BEGIN_SRC markdown
   - **must** be greater than or equal to `1.0.0`
+#+END_SRC
+- check all dependency versions are ~>= 1.0.0~
+#+BEGIN_SRC markdown
   - **must not** contain a SemVer prerelease suffix, e.g. `1.0.0-beta`
 
 (See the example for clarification).
@@ -216,12 +238,17 @@ When listing dependencies in your `bower.json` manifest, the <a href="https://se
   <p>Examples of spec-compliant dependency versions: <code>^1.0.0</code>, <code>&lt;3</code></p>
   <p>Examples of non-spec-compliant dependency versions: <code>^0.1.0</code>, <code>1.0.0</code>, <code>~1.0.0</code>, <code>^2.0.0-beta.4</code></p>
 </aside>
+#+END_SRC
+- ensure that semver ranges don't include a ~-prerelease~
 
+#+BEGIN_SRC markdown
 When an Origami component is a dependency of many other Origami components, it **must** verify and assert the widest version compatibility possible, including maintaining compatibility with earlier versions of a dependency unless to do so would be impractical. E.g. specifying a broad version range like `"o-colors": ">=3.0.0 <5"`
 
 <aside>If you want to understand more about how a SemVer expression matches specific versions, try <a href="https://semver.npmjs.com/" class="o-typography-link--external">npm's SemVer calculator</a>.</aside>
+#+END_SRC
+- allow this, warn about it with clippy
 
-
+#+BEGIN_SRC markdown
 ## Source control
 
 Origami component code **must** reside in a Git repository which has the same name as the component ([see naming conventions](#naming-conventions)). This repository **must** be stored remotely under one of the following GitHub organisations:
@@ -229,11 +256,19 @@ Origami component code **must** reside in a Git repository which has the same na
   - <a href="https://github.com/Financial-Times" class="o-typography-link--external">Financial-Times</a>
   - <a href="https://github.com/ft-interactive" class="o-typography-link--external">FT-Interactive</a>
   - <a href="https://github.com/ftlabs" class="o-typography-link--external">FTLabs</a>
+#+END_SRC
+- check the git config to ensure a remote points at one of these
 
+#+BEGIN_SRC markdown
 Component repositories **should** be public by default, however they **may** be private if there is a compelling reason, e.g. to comply with a font license in the case of `o-fonts-assets`.
+#+END_SRC
+- we could check this with the github api, if the user is connected to a network.
 
+#+BEGIN_SRC markdown
 Commit messages **should** describe the change that they introduce to a component.
+#+END_SRC
 
+#+BEGIN_SRC markdown
 ## Code
 
 ### Markup
@@ -249,7 +284,10 @@ See [the Origami Sass Specification](/spec/v1/sass).
 ### Behaviour
 
 See the [Origami javascript specification](/spec/v1/javascript).
+#+END_SRC
+- ensure the component passes each of these specs
 
+#+BEGIN_SRC markdown
 ### Subresources
 
 Origami components **may** load additional files (fonts, JSON data, images etc) from their own source. To do so safely, components **must** resolve file paths using the <a href="https://github.com/Financial-Times/o-assets" class="o-typography-link--external">Origami assets module</a>:
@@ -257,7 +295,11 @@ Origami components **may** load additional files (fonts, JSON data, images etc) 
 Without any explicit configuration, `o-assets` will assume, as we do for sub-resources in Sass, that the components are installed publicly at a URL path of `/bower_components` on the current host, and will form URLs on that basis.  Product developers are advised to reconfigure `o-assets` to accommodate their own server-side URL routing architecture.
 
 Where external resources are not within Origami components, a <a href="https://www.paulirish.com/2010/the-protocol-relative-url/" class="o-typography-link--external">protocol-relative</a> URL **must** be used (see <a href="https://github.com/Financial-Times/ft-origami/issues/173" class="o-typography-link--external">issue 173</a>.
+#+END_SRC
+- check that things that appear to be URLs are protocol relative?? i have no idea
+- maybe check that http:// and https:// don't appear anywhere???
 
+#+BEGIN_SRC markdown
 ## Testing
 
 ### Automated tests
@@ -267,30 +309,48 @@ Components **should** include automated tests which at least verify that the com
 A component author **may** additionally test their component however they like, providing that all test-related files **should** be in the `test` directory, and also ignored as outlined in [Bower ignored files](#bower-ignored-files). A component **may** use Origami Build tools to run the tests for consistency:
 
 <pre><code class="o-syntax-highlight--bash">npx origami-build-tools test</code></pre>
+#+END_SRC
+- ensure the user is using the name `test`, not `tests` or `spec` for tests
+- clippy will require the tests to be of the type and in the location expected by ~obt~
 
+#+BEGIN_SRC markdown
 ### Linting
 
 Component JavaScript and Sass source code **should** be linted. A component author **may** use <a href="https://github.com/Financial-Times/origami-build-tools" class="o-typography-link--external">Origami Build Tools</a> to do this:
 
 <pre><code class="o-syntax-highlight--bash">npx origami-build-tools verify</code></pre>
+#+END_SRC
+- well... we'll also allow `oat lint` or `origami component lint`
 
+#+BEGIN_SRC markdown
 ### Continuous integration
 
 Components **should** implement CI. If a component does so then it **should** verify that the component can be built using <a href="https://github.com/Financial-Times/origami-build-tools" class="o-typography-link--external">Origami Build Tools</a>, as mentioned in [Automated tests](#automated-tests).
+#+END_SRC
+- check tests are runnable with obt (location, mocha, etc)
 
+#+BEGIN_SRC markdown
 ### Browser/manual testing
 
 All components **must** be tested with all the browsers listed in the <a href="/docs/components/compatibility/#browser-support">FT browser support policy</a>. If a component includes JavaScript, it **must** be error free in all the browsers that fall above the recommended minimum boundary for enhanced experience in that policy.
+#+END_SRC
+- this is tested during testing, not really validatable
 
+#+BEGIN_SRC markdown
 The versions tested **should** be listed in the component’s documentation, so that when boundary recommendations are changed, it is still possible to determine the support that was designed into an older component.
+#+END_SRC
+- um, ok. we can check the README for that
 
-
+#+BEGIN_SRC markdown
 ## Documentation
 
 ### Github Repo
 
 If the repository is hosted on GitHub, the Github “Website” URL **should** be configured to be the component's page in the Origami registry (e.g. "http://registry.origami.ft.com/components/o-grid").
+#+END_SRC
+- could check this with github api if the user is connected to network
 
+#+BEGIN_SRC markdown
 ### README
 
 A component **should** include a `README.md` in the root of the component's codebase. The README **should**:
@@ -299,32 +359,65 @@ A component **should** include a `README.md` in the root of the component's code
 - Provide the licence, which **should** conform to the <a href="https://docs.google.com/document/d/1pI-qI3BrO5edFYdHcoDCH9wVbfbFvroclxSEtkXwpCw" class="o-typography-link--external">open source release policy</a>.
 
 The README **should not** include generic information (e.g. installation steps that apply equally to all components in general), but a link to such documentation **may** be included.
+#+END_SRC
+- we can validate that it includes a description line directly under the header similar to how treecreeper works
+- we can check there is an examples section
+- ensure we provide a link to a license
 
+#+BEGIN_SRC markdown
 ### Migration
 
 When a new major version of a component is released a migration guide **should** be written to help users upgrade from the previous release. The migration guide **should** be added to a `MIGRATION.md` file in the root of the component's codebase, and **should** be linked to from the component's `README.md`. See <a href="https://github.com/Financial-Times/o-table#migration" class="o-typography-link--external">o-table's migration guide</a> as an example.
+#+END_SRC
+- if the git tags show more than 1 major version ensure there is a Migration Guide.
+- the github action for releases that Jake wrote should check there is a section in the migration guide for the new version
 
+#+BEGIN_SRC markdown
 ### Codedocs
 
 Component JavaScript **should** be documented using <a href="http://usejsdoc.org/" class="o-typography-link--external">JSDoc</a> and component Sass should be documented with <a href="http://sassdoc.com/" class="o-typography-link--external">SassDoc</a>. This allows users to view and search the component's public interface in the registry. For example, see <a href="https://registry.origami.ft.com/components/o-grid/sassdoc">o-grid's SassDocs</a>.
+#+END_SRC
 
+- check we get docs for our code
+- warn on any undocumented public functions
+
+#+BEGIN_SRC markdown
 ## Browser support
 
 All components **must** be tested with all the browsers listed in the [FT browser support policy](/docs/components/compatibility/#browser-support). If a component includes JavaScript, it **must** be error free in all the browsers which fall under the "enhanced experience" in that policy.
+#+END_SRC
 
+- didn't i already read this a few sections ago?
+
+#+BEGIN_SRC markdown
 ## Demos
 
 Component authors **should** provide component demos, which **must** be [defined in origami.json](/spec/v1/manifest/#demos) and built with <a href="https://www.npmjs.com/package/origami-build-tools" class="o-typography-link--external">Origami Build Tools</a>.
+#+END_SRC
+- if there's a demos directory ensure there's a demos section in the origami.json
 
+#+BEGIN_SRC markdown
 When deciding what demos to create, demos:
 - **Must** be based on realistic use cases.
 - **Should** be visually different from one another.
 - **Should not** be used to explain configuration and implementation differences, these should be explained in the component’s README.
+#+END_SRC
+- don't know about checking this. we can check if two demos produce the same dom, or the same pixels... if we want
 
+#+BEGIN_SRC markdown
 When building demos, they:
-- **Should** have a description explaining what they show ([see origami.json](/spec/v1/manifest/#demos)).
+- **Must** have a description explaining what they show ([see origami.json](/spec/v1/manifest/#demos)).
+#+END_SRC
+- Will be checked by the manifest validator
+#+BEGIN_SRC markdown
 - **Should** be reproducable using the [Origami Build Service](/docs/services/#build-service) by copying the demo markup.
+#+END_SRC
+- this is interesting... visual regression testing between origami-build-service and demo with sass!? that doesn't work in development though
+#+BEGIN_SRC markdown
 - **Should not** include more than necessary to demonstrate the component, including: any headings, backgrounds, margins or other content that are not part of the component itself.
+#+END_SRC
+- we *could* check the demo markdown only includes classes mentioned in the sass, or ~demo-~ prefixed classes? and that it doesn't set ~<body bgcolor~
+#+BEGIN_SRC markdown
 
 Where styles need to be added specifically for a demo (e.g. to make the content of o-grid containers visible), they **must** be attached to classes with a `demo-` prefix, for example:
 ```
@@ -332,46 +425,114 @@ Where styles need to be added specifically for a demo (e.g. to make the content 
   background-color: red;
 }
 ```
+#+END_SRC
+- check any classes not mentioned in the sass are are ~demo-~ prefixed
 
+#+BEGIN_SRC markdown
 ## Build Step
 
 All components **must** be buildable by the <a href="https://www.ft.com/__origami/service/build/v2/" class="o-typography-link--external">Origami Build Service</a>.
+#+END_SRC
+- i'll have to learn more about the build service for this, to know if it can be checked.
+- if the build service uses the same build tools as we do, it should be checkable by running a thing
 
+#+BEGIN_SRC markdown
 ## Component Lifecycle
 
 ### Component Release
 
 The first released version of a component **must** be `v1.0.0`. Versions lower than 1 are subject to different semver parsing logic, which is a nuance best avoided.
+#+END_SRC
+- can't check this in a way someone can do anything about really, because a version number existing means the release has already happened :/
 
+#+BEGIN_SRC markdown
 To ensure subsequent releases don't affect the current users of a component:
 
 - Follow our guidelines on [deprecating component features](#component-feature-deprecation), making sure deprecated features still work. If an interface wasn't intended for public use but wasn't made private, removal will have to follow the same deprecation process as explicitly public code.
+#+END_SRC
+- error if something is removed in a minor version and recommend deprecation
+#+BEGIN_SRC markdown
 - Don’t make a major release until all or most dependants have removed deprecated features.
+#+END_SRC
+- this requires knowing our dependents. even if we take this to mean it's only referring to `origami` components it might require knowing too much... unless we release whatever tree is generated by `oat` somewhere when a major version is published and we have a reverse-dependency tree available.
+#+BEGIN_SRC markdown
 - When updating a dependency to the latest minor release, make a minor release.
+#+END_SRC
+- this should be checked by the continuous delivery script
+#+BEGIN_SRC markdown
 - When updating a dependency to the latest major release, make sure the semver range includes the previous major release (_e.g. `>=1.2.3 <3`_). If not, a major release is necessary.
+#+END_SRC
+- this could be checked by the continuous delivery script
+#+BEGIN_SRC markdown
 - When adding a new dependency, make a major release as it may break existing bundles.
+#+END_SRC
+- this could be checked by the continuous delivery script
+#+BEGIN_SRC markdown
 - When using a new browser API which requires support from the Polyfill service (added in the features list of the `origami.json`), make a major release.
+#+END_SRC
+- we can automate this using the thing jake wrote for getting javascript features from analysing a js file
 
+#+BEGIN_SRC markdown
 ### Component Release Notice
 
 When new versions of components are released, updates **may** be needed to other components and products that consume the component. The following notification rules apply:
+#+END_SRC
+- This section doesn't seem like it belongs in a specification but let's go
 
+#+BEGIN_SRC markdown
 - If the release is a new **major** version, the component developer **must** notify maintainers of all components and products with dependents, at least 1 day prior to the release being tagged (to enable other breaking changes to be suggested), and again immediately after the release. When a new **major** release affects many dependent components and projects we call this a [major cascade](/docs/components/major-cascade/). It **may** require [extra consideration](/docs/components/major-cascade/) before release.
+#+END_SRC
+- this is weird and impossible, but the continuous delivery github action could add a comment reminding the person to do this when they add the `major` label.
+#+BEGIN_SRC markdown
 - If the release is a new **minor** version, the component developer **should** notify maintainers of all components and products listed as dependents in the Origami registry, immediately after the release.
+#+END_SRC
+- the continuous delivery github action could add a comment reminding the developer to do this when they add the `minor` label
+#+BEGIN_SRC markdown
 - If the release is a new **patch** version, no notifications need be sent.
-
+#+END_SRC
+- ok
+#+BEGIN_SRC markdown
 ### Component Feature Deprecation
 
 - Deprecated code **should** go into a private deprecated file, or, if there’s an abundance of deprecated code, to a directory called `deprecated`. This way, it will be much easier to work with the new code while maintaining legacy code. It will also be easier to delete when making a major release.
+#+END_SRC
+- we can warn on this
+#+BEGIN_SRC markdown
 - If separating deprecated code into its own `deprecated` file or directory is not pragmatic, modified code **must** be appended and prepended with a comment which begins ```@deprecated```, followed by text which describes the deprecation.
+#+END_SRC
+- this is better.
+- ensure that ~@deprecated~ notices include a message
+#+BEGIN_SRC markdown
 - Deprecated functions and mixins **should** log a warning stating that they are now deprecated and offering an alternative when there is one. This warning **may** also be added to the README.
+#+END_SRC
+- ensure that ~@deprecated~ functions and mixins contain a ~@warn~
+#+BEGIN_SRC markdown
 - An issue with label `type: breaking` **must** be created as a reminder to remove deprecated code upon a future major release.
-
+#+END_SRC
+- we can't check this without contacting the github api, but clippy can remind people that newly introduced deprecations need this.
+#+BEGIN_SRC markdown
 ### Component Deprecation
 
 In the event of deprecating an Origami component, the following steps **must** be followed:
-
+#+END_SRC
+- `oat deprecate` anyone?
+- also, does this belong in a spec? maybe this is a tutorial
+#+BEGIN_SRC markdown
 1. Modify [origami.json](/spec/v1/manifest/) to change the `supportStatus` to `deprecated`.
+
 2. Change the `README.md` to have a paragraph at the top outlining the deprecation status. If it has been replaced, it must point to the new replacement component from the deprecated component.
+#+END_SRC
+
+- confirm that if ~supportStatus~ is ~deprecated~ then the readme has a deprecation warning
+
+#+BEGIN_SRC markdown
 3. Disable the Issues functionality from the deprecated component's repository, if the component is hosted on Github.
+#+END_SRC
+
+- hmm, we archive the components actually.
+
+#+BEGIN_SRC markdown
 4. Update the repository's description to "deprecated - please use <component> instead" if it has been replaced and change the URL to point towards the replacement's repository on GitHub.
+#+END_SRC
+
+- can't check this without contacting github api
