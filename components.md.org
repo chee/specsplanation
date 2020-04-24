@@ -433,8 +433,7 @@ Where styles need to be added specifically for a demo (e.g. to make the content 
 
 All components **must** be buildable by the <a href="https://www.ft.com/__origami/service/build/v2/" class="o-typography-link--external">Origami Build Service</a>.
 #+END_SRC
-- i'll have to learn more about the build service for this, to know if it can be checked.
-- if the build service uses the same build tools as we do, it should be checkable by running a thing
+- check that obt5fork can be used to build the sass :)
 
 #+BEGIN_SRC markdown
 ## Component Lifecycle
