@@ -1,0 +1,552 @@
+#+BEGIN_SRC markdown
+# Origami.json Manifest Specification
+`origami.json` is a <a href="https://www.json.org/" class="o-typography-link--external"><abbr title="JavaScript Object Notation">JSON</abbr></a> format file that is responsible for describing various aspects of an Origami project.
+#+END_SRC
+
+- check it's a valid json file
+
+#+BEGIN_SRC markdown
+## Properties
+
+### description
+
+<table class="o-manifest__table o-table o-table--compact o-table--row-headings o-table--vertical-lines o-table--horizontal-lines" data-o-component="o-table">
+	<tr>
+		<th scope="row" role="rowheader">Type</th>
+		<td><code>String</code></td>
+	</tr>
+	<tr>
+		<th scope="row" role="rowheader">Required</th>
+		<td><code>true</code></td>
+	</tr>
+</table>
+
+**Should** be a concise description of the purpose of the project.
+<pre><code class="o-syntax-highlight--json">{
+	"description": "Branded tables"
+}</code></pre>
+#+END_SRC
+
+- expect it to be a short (140 char?) string
+
+#+BEGIN_SRC markdown
+### origamiType
+
+<table class="o-manifest__table o-table o-table--compact o-table--row-headings o-table--vertical-lines o-table--horizontal-lines" data-o-component="o-table">
+	<tr>
+		<th scope="row" role="rowheader">Type</th>
+		<td><code>String</code> or <code>null</code></td>
+	</tr>
+	<tr>
+		<th scope="row" role="rowheader">Required</th>
+		<td><code>true</code></td>
+	</tr>
+</table>
+
+Defines the type of Origami project that the manifest belongs to. **Must** be set to one of:
+- `"module"`: A front-end component that follows [the component specification](/spec/v1/components/)
+- `"imageset"`: A set of images that have an alias on the Origami Image Service
+- `"service"`: An HTTP service that follows [the service specification](/spec/v1/services/)
+- `"cli"`: A command line tool
+- `"library"`: A library that is not a front-end component
+- `"website"`: Origami websites that aren't intended to be services
+- `"config"`: Projects that are configuration for other projects
+- `"example"`: Example and boilerplate projects
+- `"meta"`: Repository-only projects that relate to how Origami works
+- `null`: An Origami project that does not fit any of the named categories
+#+END_SRC
+
+- expect it to be one of these
+- print out these descriptions if it's undefined
+
+#+BEGIN_SRC markdown
+<aside>
+	The <code>type</code> of <code>"module"</code> is a hangover from when client-side Origami components were named "modules". It's likely to change in a later version of the spec.
+</aside>
+
+<pre><code class="o-syntax-highlight--json">{
+	"origamiType": "module"
+}</code></pre>
+#+END_SRC
+
+- clippy can recommend they use `component` now
+
+#+BEGIN_SRC markdown
+### origamiVersion
+
+<table class="o-manifest__table o-table o-table--compact o-table--row-headings o-table--vertical-lines o-table--horizontal-lines" data-o-component="o-table">
+	<tr>
+		<th scope="row" role="rowheader">Type</th>
+		<td><code>Integer</code></td>
+	</tr>
+	<tr>
+		<th scope="row" role="rowheader">Required</th>
+		<td><code>true</code></td>
+	</tr>
+</table>
+
+**Must** be set to `1`. It is the version of Origami to which the project conforms.
+<pre><code class="o-syntax-highlight--json">{
+	"origamiVersion": 1
+}</code></pre>
+#+END_SRC
+
+- expect a 1
+
+#+BEGIN_SRC markdown
+### brands
+
+<table class="o-manifest__table o-table o-table--compact o-table--row-headings o-table--vertical-lines o-table--horizontal-lines" data-o-component="o-table">
+	<tr>
+		<th scope="row" role="rowheader">Type</th>
+		<td><code>Array</code></td>
+	</tr>
+	<tr>
+		<th scope="row" role="rowheader">Required</th>
+		<td><code>false</code></td>
+	</tr>
+</table>
+
+For components which support [brands](/docs/components/branding/), this **must** an array of one or more brands: "master", "internal, "whitelabel".
+#+END_SRC
+
+- we can check if o-brand is installed, and if any o-brand sass mixins or functions are being used. if they are, we can error if the array does not exst
+- error if entries are not "master", "internal" or "whitelabel"
+- make sure this contains everything used in the demos
+
+#+BEGIN_SRC markdown
+### keywords
+
+<table class="o-manifest__table o-table o-table--compact o-table--row-headings o-table--vertical-lines o-table--horizontal-lines" data-o-component="o-table">
+	<tr>
+		<th scope="row" role="rowheader">Type</th>
+		<td><code>Array</code></td>
+	</tr>
+	<tr>
+		<th scope="row" role="rowheader">Required</th>
+		<td><code>true</code></td>
+	</tr>
+</table>
+
+Expects keywords related to the project to help discover it in the registry. These **should** be stored as an array. These **may** be stored as a comma-separated string.
+
+<pre><code class="o-syntax-highlight--json">{
+	"keywords": ["table", "rows", "columns"]
+}</code></pre>
+#+END_SRC
+
+- make sure this is here
+- make sure it's a comma separated string or an array
+
+#+BEGIN_SRC markdown
+### origamiCategory
+
+<table class="o-manifest__table o-table o-table--compact o-table--row-headings o-table--vertical-lines o-table--horizontal-lines" data-o-component="o-table">
+	<tr>
+		<th scope="row" role="rowheader">Type</th>
+		<td><code>String</code></td>
+	</tr>
+	<tr>
+		<th scope="row" role="rowheader">Required</th>
+		<td><code>true</code>*</td>
+	</tr>
+</table>
+
+*Applies to `{ "origamiType": "module" }` only.
+
+Describes the organisational category the component belongs to. **Must** be one of:
+- `components`
+- `primitives`
+- `utilities`
+- `layouts`
+
+<pre><code class="o-syntax-highlight--json">{
+	"origamiCategory": "components"
+}</code></pre>
+#+END_SRC
+
+- when parsing a component json ensure the value is one of these.
+- when parsing a non-component json ensure this is not here
+
+#+BEGIN_SRC markdown
+### support
+<table class="o-manifest__table o-table o-table--compact o-table--row-headings o-table--vertical-lines o-table--horizontal-lines" data-o-component="o-table">
+	<tr>
+		<th scope="row" role="rowheader">Type</th>
+		<td><code>String</code></td>
+	</tr>
+	<tr>
+		<th scope="row" role="rowheader">Required</th>
+		<td><code>true</code></td>
+	</tr>
+</table>
+Describes where a user can go for support on this project. **Should** be the URL of the project's GitHub issues.
+
+<pre><code class="o-syntax-highlight--json">{
+	"support": "https://github.com/Financial-Times/o-table/issues"
+}</code></pre>
+#+END_SRC
+
+- Check this exists
+- clippy can warn if the url is not ~github.com/Financial-Times/$component_name/issues~
+
+#+BEGIN_SRC markdown
+### supportStatus
+
+<table class="o-manifest__table o-table o-table--compact o-table--row-headings o-table--vertical-lines o-table--horizontal-lines" data-o-component="o-table">
+	<tr>
+		<th scope="row" role="rowheader">Type</th>
+		<td><code>String</code></td>
+	</tr>
+	<tr>
+		<th scope="row" role="rowheader">Required</th>
+		<td><code>true</code></td>
+	</tr>
+</table>
+
+Describes the support status of the project's major version. **Must** be one of:
+- `active`: feature development ongoing, bug reports will be gratefully received and acted upon promptly
+- `maintained`: not actively developed but reproducible bugs will be fixed promptly and work done where necessary to maintain compatibility with platforms and other projects
+- `deprecated`: not actively developed, not recommended for new projects, only the most disabling bugs will be addressed and only when time allows, but existing implementations may still work
+- `dead`: decommissioned entirely, will receive no support
+- `experimental`: the project is not ready for production use
+
+<pre><code class="o-syntax-highlight--json">{
+	"supportStatus": "active"
+}</code></pre>
+#+END_SRC
+
+- check it is one of these
+
+#+BEGIN_SRC markdown
+### supportContact
+
+<table class="o-manifest__table o-table o-table--compact o-table--row-headings o-table--vertical-lines o-table--horizontal-lines" data-o-component="o-table">
+	<tr>
+		<th scope="row" role="rowheader">Type</th>
+		<td><code>Object</code></td>
+	</tr>
+	<tr>
+		<th scope="row" role="rowheader">Required</th>
+		<td><code>false</code></td>
+	</tr>
+</table>
+
+Describes contact details a user can choose from to find support for this project. The owner(s) identified in the support options commit to:
+- reviewing code prior to release
+- signing off on deployments
+- publishing and maintaining up to date releases and documentation
+- decommissioning the project when appropriate
+- provide support to the users of the project
+
+The object **requires** two properties:
+- `email`: type `String`. Is an email address that users can request support from. This email **must** be group or role based, not a named individual
+- `slack`: type `String`. Is a slack channel that users can go to for support. This **must** be in the format: organisation/channel-name
+
+<pre><code class="o-syntax-highlight--json">{
+	"supportContact": {
+		"email": "origami.support@ft.com",
+		"slack": "financialtimes/origami-support"
+	}
+}</code></pre>
+#+END_SRC
+
+- check this object has .email and .slack
+- check slack channel format is correct
+- maybe an informative print out can show what we've parsed:
+  ~contact.slack.organisation~ :: ~financialtimes~
+
+#+BEGIN_SRC markdown
+### ci
+<table class="o-manifest__table o-table o-table--compact o-table--row-headings o-table--vertical-lines o-table--horizontal-lines" data-o-component="o-table">
+	<tr>
+		<th scope="row" role="rowheader">Type</th>
+		<td><code>Object</code></td>
+	</tr>
+	<tr>
+		<th scope="row" role="rowheader">Required</th>
+		<td><code>false</code></td>
+	</tr>
+</table>
+_This object is no longer used in the Origami manifest. It is documented here for the purpose of reference in case a project does still use it_. Describes a set of one or more URLs where build information can be found.
+<pre><code class="o-syntax-highlight--json">{
+	"ci": {
+		"circle": "https://circleci.com/api/v1/project/owner/repo",
+		"travis": "https://api.travis-ci.org/repos/owner/repo/builds.json",
+		"jenkins": "https://jenkins.example.com/job/"
+	}
+}</code></pre>
+
+circle:	A CircleCI build status URL (https://circleci.com/api/v1/project/owner/repo)
+#+END_SRC
+- error if this is present
+
+#+BEGIN_SRC markdown
+### browserFeatures
+
+<table class="o-manifest__table o-table o-table--compact o-table--row-headings o-table--vertical-lines o-table--horizontal-lines" data-o-component="o-table">
+	<tr>
+		<th scope="row" role="rowheader">Type</th>
+		<td><code>Object</code></td>
+	</tr>
+	<tr>
+		<th scope="row" role="rowheader">Required</th>
+		<td><code>false</code></td>
+	</tr>
+</table>
+
+Applies to `{ "origamiType": "module" }` only. Outlines the browser features required for the component's functionality.
+The object accepts two properties:
+- `required`: type `Array`. A list of <a href="https://polyfill.io" class="o-typography-link--external">Polyfill Service</a> features or <a href="https://modernizr.com/docs/" class="o-typography-link--external">Modernizr</a> tests, which the component assumes exists. If these features do not exist, the component may error.
+- `optional`: type `Array`. A list of <a href="https://polyfill.io" class="o-typography-link--external">Polyfill Service</a> features or <a href="https://modernizr.com/docs/" class="o-typography-link--external">Modernizr</a> tests, which the component  will use if they are available in the browser. If not the component may offer different or reduced functionality, but with graceful degradation.
+
+<pre><code class="o-syntax-highlight--json">{
+	"origamiType": "module",
+	"browserFeatures": {
+		"required": [
+		"customEvent"
+		],
+		"optional": [
+			"IntersectionObserver",
+			"IntersectionObserverEntry"
+		]
+	}
+}</code></pre>
+#+END_SRC
+
+- lol, we could check if this array is actually true by running the [[https://github.com/Financial-Times/js-features-analyser][js features analyser]] on the code, and fix it?
+- p.s. wtf modernizer?
+
+#+BEGIN_SRC markdown
+### serviceUrl
+
+<table class="o-manifest__table o-table o-table--compact o-table--row-headings o-table--vertical-lines o-table--horizontal-lines" data-o-component="o-table">
+	<tr>
+		<th scope="row" role="rowheader">Type</th>
+		<td><code>String</code></td>
+	</tr>
+	<tr>
+		<th scope="row" role="rowheader">Required</th>
+		<td><code>true</code>*</td>
+	</tr>
+</table>
+
+*Applies to `{ "origamiType": "service" }` only.
+
+Is the URL on which the service is provided.
+
+<pre><code class="o-syntax-highlight--json">{
+	"origamiType": "service",
+	"serviceUrl": "https://www.ft.com/__origami/service/build/"
+}</code></pre>
+#+END_SRC
+
+- if it's not a service, make sure this isn't here
+- if we're parsing a service, check this is a url
+
+#+BEGIN_SRC markdown
+### demosDefaults
+<table class="o-manifest__table o-table o-table--compact o-table--row-headings o-table--vertical-lines o-table--horizontal-lines" data-o-component="o-table">
+	<tr>
+		<th scope="row" role="rowheader">Type</th>
+		<td><code>Object</code></td>
+	</tr>
+	<tr>
+		<th scope="row" role="rowheader">Required</th>
+		<td><code>false</code></td>
+	</tr>
+</table>
+
+Describes default options to be applied to all demos.
+
+The object accepts the following properties:
+
+- `template`: type `String`. Describes the path to the mustache template to render
+#+END_SRC
+- check this path is pointing at a file
+- check that the file contains a mustache template
+  - can we test that every variable used in the mustache template is defined in ~data~?
+#+BEGIN_SRC markdown
+- `sass`: type `String`. Describes the path to the Sass file to compile.
+#+END_SRC
+- check that this is a file
+- check the file is sass
+#+BEGIN_SRC markdown
+- `js`: type `String`. Describes the JS file to build.
+#+END_SRC
+- check that this is a file
+- check that this file contains js
+#+BEGIN_SRC markdown
+- `data`: type `Object` or `String`. Describes data to populate to the mustache template with. If this is a string it must be a path to a JSON file containing the data, relative to the root of the repo.
+#+END_SRC
+- if it's a string, check the file exists and is valid json
+#+BEGIN_SRC markdown
+- `documentClasses`: type `String`. Names CSS classes to set on the `html` tag.
+#+END_SRC
+- check these classes are valid
+#+BEGIN_SRC markdown
+- `dependencies`: type `Array`. Is a list of other components that are only needed for demos, which will be loaded via the <a href="https://www.ft.com/__origami/service/build" class="o-typography-link--external">Build Service</a>
+#+END_SRC
+- check that these are available via build service maybe? if there is network, otherwise show this as an unrun test
+#+BEGIN_SRC markdown
+All of these properties are **optional**.
+
+<pre><code class="o-syntax-highlight--json">{
+	"demosDefaults": {
+		"template": "demos/src/demo.mustache"
+		"sass": "demos/src/demo.scss",
+		"js": "demos/src/demo.js"
+		"data": {
+			"striped-rows": true
+		},
+		"documentClasses": "demo-container",
+		"dependencies": ["o-normalise"]
+	}
+}</code></pre>
+#+END_SRC
+
+- make sure demoDefaults contains nothing other than these properties
+
+#+BEGIN_SRC markdown
+### demos
+<table class="o-manifest__table o-table o-table--compact o-table--row-headings o-table--vertical-lines o-table--horizontal-lines" data-o-component="o-table">
+	<tr>
+		<th scope="row" role="rowheader">Type</th>
+		<td><code>Array</code></td>
+	</tr>
+	<tr>
+		<th scope="row" role="rowheader">Required</th>
+		<td><code>false</code></td>
+	</tr>
+</table>
+
+It accepts an array. Is a list of configuration objects for individual demos.
+#+END_SRC
+- check this is an array of demo objects
+#+BEGIN_SRC markdown
+Each object in the list accepts the following properties:
+
+**required**:
+- `name`: type `String`. Demo name which will be used as the name of the outputted html file
+- `title`: type `String`. A title for the demo which will appear when listed in the Registry
+- `description`: type `String`. An explanation of the purpose of the demo
+- `template`: type `String`. Describes the path to the demo-specific mustache template to render
+#+END_SRC
+- check ~name~ is a valid file name?
+- check ~title~ and ~description~ are strings
+- check ~template~ points at a file and the file is a mustache file
+  - can we check the mustache file only uses variables defined in ~data~?
+#+BEGIN_SRC markdown
+**optional**:
+- `sass`: type `String`. Describes the path to the demo-specific Sass file to compile.
+#+END_SRC
+- check that this is a file
+- check the file is sass
+#+BEGIN_SRC markdown
+- `js`: type `String`. Describes the path to the demo-specific JS file to build.
+#+END_SRC
+- check that this is a file
+- check the file is js
+#+BEGIN_SRC markdown
+- `data`: type `Object` or `String`. Describes data to populate to the component-specific mustache template with. If this is a string it must be a path to a JSON file containing the data, relative to the root of the repo.
+#+END_SRC
+- if it's a string, check the file exists and is valid json
+#+BEGIN_SRC markdown
+- `brands`: type `Array`. For components which support [brands](/docs/components/branding/), this describes one or more brands which the demo applies to ("master", "internal, "whitelabel")
+#+END_SRC
+- check this doesn't contain any brands that aren't in the origami.json#brands array
+- maybe clippy can advice if any of the supported brands are never used in a demo
+#+BEGIN_SRC markdown
+- `documentClasses`: type `String`. Names CSS classes to set on the component-specific `html` tag
+#+END_SRC
+- make sure this is a valid ~class=""~ string
+#+BEGIN_SRC markdown
+- dependencies: type `Array`. Is a list of other components that are only needed in this specific demo, which will be loaded via the <a href="https://www.ft.com/__origami/service/build" class="o-typography-link--external">Build Service</a>
+#+END_SRC
+- check that these are available via build service maybe? if there is network, otherwise show this as an unrun test
+#+BEGIN_SRC markdown
+- `hidden`: type `Boolean`. Whether the demo should be hidden in the Registry
+- `display_html`: type `Boolean`. Whether the demo should have a HTML tab in the Registry (defaults to true)
+#+END_SRC
+#+BEGIN_SRC markdown
+<pre><code class="o-syntax-highlight--json">{
+	"demos": [
+		{
+			"name": "Basic table",
+			"description": "Basic table implementation",
+			"template": "demos/src/basic-component.mustache"
+		},
+		{
+			"name": "Striped table",
+			"description": "Striped table implementation",
+			"template": "demos/src/striped-table.mustache",
+			"sass": "demos/src/striped-table.scss",
+			"documentClasses": "demo-striped-table-container",
+			"brands": ["master", "internal"]
+		},
+		{
+			"name": "pa11y",
+			"description": "Hidden test for pa11y",
+			"hidden": true,
+			"template": "demos/src/pa11y.mustache"
+		}
+	]
+}</code></pre>
+
+## Example
+
+This example joins all of the property snippets outlined above:
+
+<pre><code class="o-syntax-highlight--json">{
+	"description": "Branded tables",
+	"origamiType": "module",
+	"origamiVersion": 1,
+	"keywords": ["table", "rows", "columns"],
+	"origamiCategory": "components",
+	"support": "https://github.com/Financial-Times/o-table/issues",
+	"supportStatus": "active",
+	"supportContact": {
+			"email": "origami.support@ft.com",
+			"slack": "financialtimes/origami-support"
+		}
+	"browserFeatures": {
+		"required": [
+		"customEvent"
+		],
+		"optional": [
+			"IntersectionObserver",
+			"IntersectionObserverEntry"
+		]
+	},
+	"demosDefaults": {
+		"template": "demos/src/demo.mustache"
+		"sass": "demos/src/demo.scss",
+		"js": "demos/src/demo.js"
+		"data": {
+			"striped-rows": true
+		},
+		"documentClasses": "demo-container",
+		"dependencies": ["o-normalise"]
+	},
+	"demos": [
+		{
+			"name": "Basic table",
+			"description": "Basic table implementation",
+			"template": "demos/src/basic-component.mustache"
+		},
+		{
+			"name": "Striped table",
+			"description": "Striped table implementation",
+			"template": "demos/src/striped-table.mustache",
+			"sass": "demos/src/striped-table.scss",
+			"documentClasses": "demo-striped-table-container"
+		},
+		{
+			"name": "pa11y",
+			"description": "Hidden test for pa11y",
+			"hidden": true,
+			"template": "demos/src/pa11y.mustache"
+		}
+	]
+}</code></pre>
+#+END_SRC
